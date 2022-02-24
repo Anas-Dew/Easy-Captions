@@ -4,35 +4,41 @@ from set_path import setPath
 import subprocess
 from pydub import AudioSegment
 from pydub.silence import split_on_silence
+from termcolor import cprint
 
 # -------functions--initialized----------
 r=sr.Recognizer()
-
 setPath("Easy-Captions","bin")
-print("Current Working Directory Set -->",os.getcwd())
+cprint(f"Current Working Directory Set --> {os.getcwd()}",'green')
 
 # audo = "Sample.wav"
 # audo = "LongSample.wav"
-raw_text =""
-video_name =""
+
+raw_text = ""
+video_name = ""
+step = -1
+
 # -----------Functions--Defined-----------
 
 def recognize_Audio():
     global raw_text
+    global step
     os.chdir("../temp")
-    print("Working in ->" ,os.getcwd())
-    for all_temp in range(2):
+    cprint(f"Working in -> {os.getcwd()}",'green')
+
+    for all_temp in range(chunks_count):
         
         with sr.AudioFile(f"chunk{all_temp}.mp3") as source:
                 audio_data = r.record(source)
                 try:
                     raw_text = r.recognize_google(audio_data)
-                    print("Captured data : " ,raw_text)
+                    cprint(f"Captured data : {raw_text}",'blue')
                     
                 except:
-                    print("Internet Error !")
-                    
+                    cprint("\n\t\tError !",'red')
+        step+=1
         save_Caption_File()
+        os.remove(f"chunk{all_temp}.mp3")
         
 
 def split(filepath):
@@ -40,17 +46,17 @@ def split(filepath):
     sound = AudioSegment.from_wav(filepath)
     dBFS = sound.dBFS
     chunks = split_on_silence(sound, 
-        min_silence_len = 800,
-        silence_thresh = dBFS-30,
+        min_silence_len = 700,
+        silence_thresh = dBFS-31,
     )
     chunks_count = len(chunks)
 
     os.chdir("../temp")
     for i in range(chunks_count):
 
-        print(chunks[i])
+        cprint(chunks[i],'red')
 
-        print("Exporting chunk{0}.mp3.".format(i))
+        cprint("Exporting chunk{0}.mp3.".format(i),'green')
         chunks[i].export(
             ".//chunk{0}.mp3".format(i),
             bitrate = "192k",
@@ -60,7 +66,7 @@ def split(filepath):
 
 def extract_Audio(video):
     global video_name
-    print("Working in -> ",os.getcwd())
+    cprint(f"Working in -> {os.getcwd()}",'green')
     command = f"ffmpeg -i {video} -ab 160k -ac 2 -ar 44100 -vn con_audio.wav"
     subprocess.call(command, shell=True)
     video_name = video
@@ -68,22 +74,18 @@ def extract_Audio(video):
 def save_Caption_File():
 
     os.chdir('../Export')
-    print("Saving to -> ",os.getcwd())
+    cprint(f"Saving to -> {os.getcwd()}",'green')
     
     your_file = f"{video_name[0:-4]}.srt"
-    print(f"Name of your caption file : {video_name[:-4]}.srt")
+    cprint(f"Name of your caption file : {video_name[:-4]}.srt",'green')
     
-
-    Pattern = f"{None}\n00:00:00,000 --> 00:00:00,000\n{raw_text}\n\n"
+    Pattern = f"{step}\n00:00:00,000 --> 00:00:00,000\n{raw_text}\n\n"
 
     with open(your_file,"a") as ca:
         ca.writelines(Pattern)
         ca.close()
 
-
     setPath("Easy-Captions","temp")
-
-
 
 if __name__ == "__main__" :
     extract_Audio("LongSample.mp4")
