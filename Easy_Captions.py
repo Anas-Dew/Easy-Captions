@@ -6,17 +6,22 @@ from pydub import AudioSegment
 from pydub.silence import split_on_silence
 from termcolor import cprint
 
-# -------functions--initialized----------
+# -------functions-&-Vriables--initialized----------
+
 r=sr.Recognizer()
 setPath("Easy-Captions","bin")
 cprint(f"Current Working Directory Set --> {os.getcwd()}",'green')
 
-# audo = "Sample.wav"
-# audo = "LongSample.wav"
-
 raw_text = ""
 video_name = ""
 step = -1
+# --------Caption-Specific-Variables--------
+hrs = 00
+mins = 00
+secs = 00
+mili_Secs = 000
+start_Time = f"{hrs}:{mins}:{secs},{mili_Secs}"
+end_Time = f"{hrs}:{mins}:{secs},{mili_Secs}"
 
 # -----------Functions--Defined-----------
 
@@ -36,7 +41,9 @@ def recognize_Audio():
                     
                 except:
                     cprint("\n\t\tError !",'red')
+
         step+=1
+        
         save_Caption_File()
         os.remove(f"chunk{all_temp}.mp3")
         
@@ -46,8 +53,8 @@ def split(filepath):
     sound = AudioSegment.from_wav(filepath)
     dBFS = sound.dBFS
     chunks = split_on_silence(sound, 
-        min_silence_len = 700,
-        silence_thresh = dBFS-31,
+        min_silence_len = 580,
+        silence_thresh = dBFS-37,
     )
     chunks_count = len(chunks)
 
@@ -55,8 +62,8 @@ def split(filepath):
     for i in range(chunks_count):
 
         cprint(chunks[i],'red')
-
         cprint("Exporting chunk{0}.mp3.".format(i),'green')
+        
         chunks[i].export(
             ".//chunk{0}.mp3".format(i),
             bitrate = "192k",
@@ -72,22 +79,26 @@ def extract_Audio(video):
     video_name = video
 
 def save_Caption_File():
-
+    global start_Time
+    global end_Time
     os.chdir('../Export')
     cprint(f"Saving to -> {os.getcwd()}",'green')
     
-    your_file = f"{video_name[0:-4]}.srt"
-    cprint(f"Name of your caption file : {video_name[:-4]}.srt",'green')
     
-    Pattern = f"{step}\n00:00:00,000 --> 00:00:00,000\n{raw_text}\n\n"
+    your_File = f"{video_name[0:-4]}.srt"
+    cprint(f"Name of your caption file : {video_name[:-4]}.srt",'green')
 
-    with open(your_file,"a") as ca:
-        ca.writelines(Pattern)
+    # raw_text_length = len(raw_text.split(" "))
+
+    caption_Pattern = f"{step}\n{start_Time} --> {end_Time}\n{raw_text}\n\n"
+
+    with open(your_File,"a") as ca:
+        ca.writelines(caption_Pattern)
         ca.close()
 
     setPath("Easy-Captions","temp")
 
 if __name__ == "__main__" :
-    extract_Audio("LongSample.mp4")
+    extract_Audio("LongSample3.mp4")
     split("con_audio.wav")
     recognize_Audio()
