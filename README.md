@@ -1,7 +1,7 @@
 # Easy-Captions
 Generate captions for any video you want. Super easy !.
 
-# Steps 
+## Steps 
 * Select your video
 * Algorithm will do it's work.
 * You get your caption file (srt) to use anywhere
