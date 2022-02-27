@@ -11,7 +11,7 @@ def setPath(main_folder,data_folder):
     # for mac and linux(here, os.name is 'posix')
     else:
         username = os.getlogin()
-        _ = os.chdir(f'/home/{username}/Projects/{main_folder}/{data_folder}/')
+        _ = os.chdir(f'/home/{username}/{main_folder}/{data_folder}/')
 
 if __name__ == "__main__":
     print("Working fine !")

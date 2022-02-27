@@ -9,7 +9,6 @@ from termcolor import cprint
 from pyfiglet import figlet_format
 from clearscreen import clear
 
-
 # -------functions-&-Vriables--initialized----------
 
 r=sr.Recognizer()
